@@ -13,6 +13,7 @@ Note: this script only works if [:,:,i] be a transversal slice of tubes
 
 f(Signal/pT1) - > Concentration mm/L/voxel
 
+version: internship
 
 """
 # ------------------------------- IMPORTS
