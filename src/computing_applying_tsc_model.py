@@ -13,11 +13,11 @@ Note: this script only works if [:,:,i] be a transversal slice of tubes
 
 f(Signal/pT1) - > Concentration mm/L/voxel
 
-version: internship
+version: these
 
 """
 # ------------------------------- IMPORTS
-# Imports : system libraries
+# Imports : system librariesim
 import sys
 import os
 
@@ -35,8 +35,9 @@ from scipy.stats import linregress
 
 # this is the folder where the script is install,
 # to be modify if u are running in other coputing
-root = 'Z:/people/Renata/Python_scripts/'
-folder = 'Quantification/'
+#root = 'Z:/people/Renata/Python_scripts/'
+root = 'C:/Users/rp258738/Documents/Codes_local/'
+folder = 'Quantification/src/'
 packages = ['libs']
 
 for i in range(len(packages)):
@@ -48,16 +49,17 @@ from equations import pondT1
 
 # ------------------------------ Constants, paths
 # Path strings
-data_root = 'Z:/people/Renata/Data/Pilot_study_1/'
-sub_path = 'sub-{0:02d}/func/'
-tasks_path = ['visual_sodium/', 'motor_sodium/']
-filename = 'Sandro_Rec_XMRIDynamic_visual_TR30-sub{0:02d}_{1}_echo_{2}.nii'
-output_filename =  filename[0:-4] + '_TSC_.nii'
+#data_root = 'Z:/people/Renata/Data/Pilot_study_1/'
+#data_root = 'X:/people/Renata/ReconstructedData/23Na_patients/AG160127_AG160127-2015/'
+
+#sub_path = 'sub-{0:02d}/func/'
+#filename = 'Sandro_Rec_XMRIDynamic_visual_TR30-sub{0:02d}_{1}_echo_{2}.nii'
+#output_filename =  filename[0:-4] + '_TSC_.nii'
 
 #filename = 'Z:/people/Renata/Data/Test/rfunc.nii'
 # Constants
 sub_array = [3]
-states = ['OFF','ON']
+#states = ['OFF','ON']
 #TR = 30 #[ms]
 #FA = 59
 
@@ -72,13 +74,14 @@ a_agar_model = (36-52)/5
 number_tubes = 2  # right left subdivide in RB RF LB LF where F:front B: back
 
 # information on tubes _7T
-tubes_concentrations_front = [105, 209]
-tubes_concentrations_back = [51, 155]
+tubes_concentrations_front = [209, 155]
+tubes_concentrations_back = [105, 51]
 
 # 3T 
-tubes_concentrations_front = [51,105]
-tubes_concentrations_back = [51,105]
-Machine3T = True
+Machine3T = False
+if (Machine3T == True):
+    tubes_concentrations_front = [51,105]
+    tubes_concentrations_back = [51,105]
 
 agar_concentrations = np.asarray([2.0, 2.0, 2.0, 2.0]) #np.asarray changes type 
 #list to np array, which is optimize to compute operation in all array at once
@@ -91,8 +94,8 @@ T1_agar_tubes = np.asarray([36.2, 36.2, 36.2, 36.2])
 #T2 = 13.4 or 17/5.2 #T2star = 4.3
             
 # Pick a file to get the size
-filename_ex = data_root + sub_path.format(sub_array[0]) + tasks_path[0] + filename.format(sub_array[0], states[0], 0)
-filename_ex = 'Z:/people/Alexa/B0951_Na/average25.nii'
+#filename_ex = data_root + sub_path.format(sub_array[0]) + tasks_path[0] + filename.format(sub_array[0], states[0], 0)
+filename_ex = 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/2020-03-24/Reconstructed/AB160146_AB160146-1948/average25_kspace.nii'
 # Load imaging / to open the file
 mean = False
 try:
@@ -128,7 +131,7 @@ for i in range(len(sub_array)):
     #------------------------- Getting masks
    # filename_current = data_root + sub_path.format(sub_array[i]) + tasks_path[0] + filename.format(sub_array[i], states[0], 0)
    # output_current = data_root + sub_path.format(sub_array[i]) + tasks_path[0] + output_filename.format(sub_array[i], states[0], 0)
-    filename_current = 'Z:/people/Alexa/B0951_Na/average25.nii'
+    filename_current = 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/2020-03-24/Reconstructed/AB160146_AB160146-1948/average25_kspace.nii'
     
    # Try to open the file
     try:
@@ -162,19 +165,16 @@ for i in range(len(sub_array)):
     masks, idx_change = getTube3D(image8)
     
     # veryfing if its coherent the changing tubes
-    if idx_change == -1:
-        print("ERROR: automatic slice changing tubes FAILED\n Veryfing manually the slice where the tubes changes, not")
-        if Machine3T != True:
-            exit(-1)
-        else:
+    if Machine3T == False:
+        if idx_change == -1:
+            print("ERROR: automatic slice changing tubes FAILED\n Veryfing manually the slice where the tubes changes, not")
+            idx_change = int(P/2 - 1)
+    else:
+        if idx_change == -1:
             idx_change = P - 1
+               
         
-    for i in range(P):
-        print("z",i)
-        plt.imshow(np.hstack([image64[:,:,i].T,
-                              masks[1,:,:,i].T/np.max(np.max(image8[:,:,i])),
-                              masks[0,:,:,i].T/np.max(np.max(image8[:,:,i]))]), cmap='gray')
-        plt.show()
+  
        
     # ------------------- Keeping only center
     
@@ -187,6 +187,15 @@ for i in range(len(sub_array)):
             erosion_masks[j,:,:,k] = cv2.erode(masks[j,:,:,k], kernel, iterations=1)
         
     #erosion_masks = masks    
+    initial_slice = int(np.round(P*0.1))
+    final_slice = int(np.round(P*0.90))
+
+    for i in np.linspace(initial_slice,final_slice,dtype=np.int16):
+        print("z",i)
+        plt.imshow(np.hstack([image64[:,:,i].T/np.max(np.max(image64[:,:,i])),
+                              masks[1,:,:,i].T/np.max(np.max(image8[:,:,i])),
+                              masks[0,:,:,i].T/np.max(np.max(image8[:,:,i]))]), cmap='gray')
+        plt.show()
     # ------------------- Analyzing histogram
     
     # retrive regions where we found the tubes
@@ -194,16 +203,16 @@ for i in range(len(sub_array)):
     for i in range(number_tubes):
        # masks = erosion_masks
         # Saving 0 - idx change, in Z
-        idx_true_mask =  np.where(erosion_masks[i,:,:,0:idx_change] > 0)
+        idx_true_mask =  np.where(erosion_masks[i,:,:,initial_slice:idx_change] > 0)
         roi_tube = image64[idx_true_mask]
-        average_intensities_front[i] = np.mean(roi_tube)
+        average_intensities_front[i] = np.median(roi_tube)
         
         if Machine3T != True:
             # Saving values from idx change - Last
             tst_b = masks[i,:,:,idx_change:-1]
-            idx_true_mask =  np.where(erosion_masks[i,:,:,idx_change:-1] > 0)
+            idx_true_mask =  np.where(erosion_masks[i,:,:,idx_change:final_slice] > 0)
             roi_tube = image64[idx_true_mask]
-            average_intensities_back[i] = np.mean(roi_tube)
+            average_intensities_back[i] = np.median(roi_tube)
 
         
         # IDENTIFYING the order
@@ -230,7 +239,7 @@ for i in range(len(sub_array)):
 
 
     # -------------------------- Quantifying 
-    if Machine3T != True:
+    if Machine3T == False:
         y = np.hstack([tubes_concentrations_front, tubes_concentrations_back])
         x = np.hstack([average_intensities_front, average_intensities_back])
     else:

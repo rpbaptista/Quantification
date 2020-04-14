@@ -15,7 +15,7 @@ Goal is from CSF masks and TSC map generate the corrected version.
 # WARNING: Pickle is not securized library, make sure no one has access to
 #  your pickle file other than u
 
-version: internship
+version: these
 
 """
 # TODO: take into account the PSF

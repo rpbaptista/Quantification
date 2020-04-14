@@ -62,7 +62,7 @@ def getIndexRoundAsPossible(img, nb_components, number_tubes):
     '''
     if nb_components >= 2:
         # Find contours
-        contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2:]
     
         # Initialize variables 
         area = np.zeros(len(contours))
@@ -79,24 +79,28 @@ def getIndexRoundAsPossible(img, nb_components, number_tubes):
         # Compute r from two metrics, closer two zero, closer to a perfect circle 
         r_perimeter = perimeter/(2*math.pi)
         r_area = np.sqrt(area/math.pi)
-        diff = np.abs(r_area - r_perimeter)
-      #  print(diff)
+        r_max = np.maximum(r_area,r_perimeter)
+        diff = np.abs(r_area - r_perimeter)/r_max
+
        # Getting idx of the objects more "circle"
         diff_sorted = np.sort(diff)
+        dissymmetry_tubes = (diff_sorted[1] - diff_sorted[0])
+        print(dissymmetry_tubes)
         threshold = diff_sorted[number_tubes - 1]
-        idx = np.where(diff <= threshold)
+        idx = np.where(diff <= threshold)[0]
         masks = np.zeros((number_tubes, img.shape[0],img.shape[1]))
-        
+
         idx_tube = 0
         for i in range(2):
+            j = idx[i]
             drawing = np.zeros((img.shape[0],img.shape[1], 3), dtype=np.uint8)
-            cnt = contours[i]
             color = (255,255,255)
-            cv2.drawContours(drawing, [contours[i]], 0, color, -1, cv2.LINE_8, hierarchy, 0)
+            cv2.drawContours(drawing, [contours[j]], 0, color, -1, cv2.LINE_8, hierarchy, 0)
             drawing_shape = drawing.shape
-            if len(drawing_shape) == 3:
-        #        print(idx_tube)
-                masks[idx_tube,:,:] = drawing[:,:,0]
+            if (dissymmetry_tubes < 0.20):
+                if len(drawing_shape) == 3:
+            #        print(idx_tube)
+                    masks[idx_tube,:,:] = drawing[:,:,0]
             idx_tube = idx_tube + 1
 
         #return drawing[:,:,0]    
@@ -114,7 +118,7 @@ def getTube(image, number_tubes = 2):
 #    
     # minimum and maximize size of particles we want to keep (number of pixels)
     #here, it's a fixed value, but you can set it as you want, eg the mean of the sizes or whatever
-    MIN_SIZE = 5
+    MIN_SIZE = 20
     MAX_SIZE = 300
   
     # First level selection : getting components connected within a range of value  
@@ -136,6 +140,7 @@ def getTube3D(image3D):
     nb_pixels = np.full((number_tubes, P),np.inf)
     for i in range(P):
         ch1 = image3D[:,:,i]
+        print("Z:",i)
         output[:,:,:,i] = getTube(ch1,  number_tubes) 
         for j in range(number_tubes):
             if np.sum(np.sum(output[j,:,:,i])) > 0:
