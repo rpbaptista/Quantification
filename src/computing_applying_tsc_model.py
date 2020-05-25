@@ -49,9 +49,13 @@ from equations import pondT1
 
 # ------------------------------ Constants, paths
 # Path strings
-filename_list = ['C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub01_ab160146/average_FA25.nii', 
-                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub01_ab160146/average_FA53.nii']
+filename_list = ['C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub01_ab160146/average_FA53.nii',
+                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub02_ab160281/average_FA55.nii',
+                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub03_ag160127/average_FA55.nii']
 
+filename_list = ['C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub01_ab160146/average_FA25.nii',
+                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub02_ab160281/average_FA25.nii',
+                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub03_ag160127/average_FA25.nii']
 # Constants
 #states = ['OFF','ON']
 #TR = 30 #[ms]
