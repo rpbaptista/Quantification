@@ -126,3 +126,5 @@ dmypy.json
 input/
 
 output/
+
+src/model.pickle

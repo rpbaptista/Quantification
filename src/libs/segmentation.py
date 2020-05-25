@@ -68,13 +68,21 @@ def getIndexRoundAsPossible(img, nb_components, number_tubes):
         area = np.zeros(len(contours))
         perimeter = np.zeros(len(contours))
         diff = np.zeros(len(contours))
-    
-        # Compute perimeter and area
+        cX = np.zeros(len(contours))
+        cY = np.zeros(len(contours))
+        
+        # Compute perimeter and area and center
         i = 0
         for cnt in contours:
             perimeter[i] = cv2.arcLength(cnt, True)
+            
             area[i] = cv2.contourArea(cnt)
+            
+            M = cv2.moments(cnt)
+            cX[i] = int(M["m10"] / M["m00"])
+            cY[i] = int(M["m01"] / M["m00"])
             i = i + 1
+
         
         # Compute r from two metrics, closer two zero, closer to a perfect circle 
         r_perimeter = perimeter/(2*math.pi)
@@ -84,12 +92,24 @@ def getIndexRoundAsPossible(img, nb_components, number_tubes):
 
        # Getting idx of the objects more "circle"
         diff_sorted = np.sort(diff)
-        dissymmetry_tubes = (diff_sorted[1] - diff_sorted[0])
-        print(dissymmetry_tubes)
         threshold = diff_sorted[number_tubes - 1]
         idx = np.where(diff <= threshold)[0]
         masks = np.zeros((number_tubes, img.shape[0],img.shape[1]))
+        
+        # EXCLUSION CRITERIA: DISSMETRY
+        dissymmetry_size_tubes = (diff_sorted[1] - diff_sorted[0])
+        dissymmetry_positionX_tubes = np.abs((cX[idx[1]]-cX[idx[0]])/cX[idx[1]])
+        dissymmetry_positionY_tubes = np.abs((cY[idx[1]]-cY[idx[0]])/cY[idx[1]])
+        dissymmetry_position_tubes = min(dissymmetry_positionY_tubes,dissymmetry_positionX_tubes)
+        
+        # TODO: make it robust to flips 
+       #♥ print("dissymmetry_positionX_tubes", dissymmetry_positionX_tubes,dissymmetry_position_tubes)
+   
+        #dissymmetry_positionX_tubes = (cX[idx[1]]-cX[idx[0]])/cX[idx[1]]
 
+        print("Center1:", cX[idx[0]],cY[idx[0]])
+        print("Center2:", cX[idx[1]],cY[idx[1]])
+        
         idx_tube = 0
         for i in range(2):
             j = idx[i]
@@ -97,16 +117,15 @@ def getIndexRoundAsPossible(img, nb_components, number_tubes):
             color = (255,255,255)
             cv2.drawContours(drawing, [contours[j]], 0, color, -1, cv2.LINE_8, hierarchy, 0)
             drawing_shape = drawing.shape
-            if (dissymmetry_tubes < 0.20):
+            if (dissymmetry_size_tubes < 0.20 or dissymmetry_positionX_tubes < 0.03):
                 if len(drawing_shape) == 3:
-            #        print(idx_tube)
                     masks[idx_tube,:,:] = drawing[:,:,0]
             idx_tube = idx_tube + 1
 
         #return drawing[:,:,0]    
-        return masks
+        return masks, [cX[idx[0]],cY[idx[0]]],  [cX[idx[1]],cY[idx[1]]]
     else:
-        return np.zeros(img.shape)
+        return np.zeros(img.shape), [0,0], [0,0]
 
 def getTube(image, number_tubes = 2):
 
@@ -126,31 +145,48 @@ def getTube(image, number_tubes = 2):
 
     # Second level selection: simmetry
     # Part 1 : retrivieng the more round N objects, N = number_tubes
-    output_im = getIndexRoundAsPossible(output_im, nb_components, number_tubes)
+    output_im, c1, c2 = getIndexRoundAsPossible(output_im, nb_components, number_tubes)
+    #print(c1, c2)
     
-    return output_im
+    return output_im, c1, c2
+#
+#def getMostCentralCenter(list_center):
+#    return c1
 
 def getTube3D(image3D):
     # Getting sizes
     N, M, P = image3D.shape
     number_tubes = 2
+    list_c1 = [None] * P
+    list_c2 = [None] * P
     
     # initialize the output image
     output = np.zeros((number_tubes, N, M, P), dtype = np.uint8)
     nb_pixels = np.full((number_tubes, P),np.inf)
     for i in range(P):
         ch1 = image3D[:,:,i]
-        print("Z:",i)
-        output[:,:,:,i] = getTube(ch1,  number_tubes) 
+     #   print("Z:",i)
+        output[:,:,:,i], list_c1[i], list_c2[i] = getTube(ch1,  number_tubes) 
         for j in range(number_tubes):
             if np.sum(np.sum(output[j,:,:,i])) > 0:
                 nb_pixels[j, i] = np.sum(np.sum(output[j,:,:,i]))/np.max(np.max(output[j,:,:,i]))
     
+    list_c1 = np.array(list_c1)
+    list_c2 = np.array(list_c2)
+    
+   #  c1 = [np.median(list_c1[:,0]),np.median(list_c1[:,1])]
+   # c2 = [np.median(list_c2[:,0]),np.median(list_c2[:,1])]
     # This part aim to find the transition between the tubes
     #print(nb_pixels,np.argmin(nb_pixels[0,:]),np.argmin(nb_pixels[1,:]))
     if np.argmin(nb_pixels[0,:])==np.argmin(nb_pixels[1,:]):
-        return output, np.argmin(nb_pixels[0,:])
-    return output, -1
+        return output, np.argmin(nb_pixels[0,:]), list_c1, list_c2
+    return output, -1, list_c1, list_c2
+
+def createArtificialMask(img,c1,radius):
+    mask = np.zeros(img.shape)
+    cv2.circle(mask,(int(c1[0]), int(c1[1])), radius, (255,255,255), -1)
+
+    return mask
 
 #------------------- NOT USED
 def getIndexSymmetric(img, nb_components, number_tubes):

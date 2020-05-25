@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+cr# -*- coding: utf-8 -*-
 """
 Created on Mon Jul 22 14:55:55 2019
 
@@ -35,8 +35,12 @@ import scipy.ndimage
 
 # this is the folder where the script is install,
 # to be modify if u are running in other coputing
-root = 'Z:/people/Renata/Python_scripts/'
-folder = 'Quantification/'
+#root = 'Z:/people/Renata/Python_scripts/'
+#folder = 'Quantification/'
+
+root = 'C:/Users/rp258738/Documents/Codes_local/'
+folder = 'Quantification/src/'
+
 packages = ['libs']
 
 for i in range(len(packages)):
@@ -71,15 +75,18 @@ b = model_load['b']
 #TSC_filename = 'Z:/people/Renata/Data/Pilot_study_1/sub-03/func/visual_sodium/wrSandro_Rec_XMRIDynamic_visual_TR30-sub03_OFF_echo_0_TSC_.nii'
 #output_filename =  TSC_filename[0:-4] + 'correct.nii'
 
-sodium_filename ='Z:/people/Renata/Data/Pilot_study_1/sub-03/func/visual_sodium/Sandro_Rec_XMRIDynamic_visual_TR30-sub03_OFF_echo_0.nii'
-CSF_filename = 'Z:/people/Renata/Data/Pilot_study_1/sub-03/func/visual_sodium/c3Sandro_Rec_XMRIDynamic_visual_TR30-sub03_OFF_echo_0.nii'
-GM_filename = 'Z:/people/Renata/Data/Pilot_study_1/sub-03/func/visual_sodium/c1Sandro_Rec_XMRIDynamic_visual_TR30-sub03_OFF_echo_0.nii'
-WM_filename = 'Z:/people/Renata/Data/Pilot_study_1/sub-03/func/visual_sodium/c2Sandro_Rec_XMRIDynamic_visual_TR30-sub03_OFF_echo_0.nii'
 
-sodium_filename = 'Z:/people/Alexa/B0951_Na/average25.nii'
+sodium_filename = 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/2020-03-24/Reconstructed/AB160146_AB160146-1948/average25_kspace.nii'
+sodium_filename ='X:/people/Alexa/7T_test/averageFA55.nii'
+
 CSF_filename = 'Z:/people/Alexa/B0951_test/B0951_csf_na_space.nii'
-brain_filename = 'Z:/people/Alexa/B0951_test/B0951_brain_tissue_na_space.nii'
-Machine3T = True
+#brain_filename = 'Z:/people/Alexa/B0951_test/B0951_brain_tissue_na_space.nii'
+
+CSF_filename = 'X:/people/Alexa/7T_test/c3averageFA55.nii'
+WM_filename = 'X:/people/Alexa/7T_test/c2averageFA55.nii'
+GM_filename = 'X:/people/Alexa/7T_test/c1averageFA55.nii'
+
+Machine3T = False
 
 output_filename = sodium_filename[0:-4] + '_TSC.nii'
 output_filename_no_csf =  sodium_filename[0:-4] + '_TSC_no_csf.nii'
@@ -97,7 +104,7 @@ N, M, P = (niiData.get_fdata()).shape
 probability_CSF = niiData.get_fdata() 
 
 # Load WM and GM masks
-if Machine3T != True:
+if Machine3T == False:
     niiData = nib.load(GM_filename)                
     probability_GM = niiData.get_fdata()
     niiData = nib.load(WM_filename)                
@@ -147,6 +154,8 @@ for i in range(P):
     print("  MAX:",np.max(np.max(diff)))
     print("  Negative voxels:",np.sum(np.sum(diff<0)))
     print("  Total pixels:", np.sum(np.sum(probability_CSF[:,:,i] > 0)))        
+    plt.colorbar()
+        
     plt.show()
         
 
