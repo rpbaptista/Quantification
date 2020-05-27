@@ -107,8 +107,8 @@ def getIndexRoundAsPossible(img, nb_components, number_tubes):
    
         #dissymmetry_positionX_tubes = (cX[idx[1]]-cX[idx[0]])/cX[idx[1]]
 
-        print("Center1:", cX[idx[0]],cY[idx[0]])
-        print("Center2:", cX[idx[1]],cY[idx[1]])
+      #  print("Center1:", cX[idx[0]],cY[idx[0]])
+      #  print("Center2:", cX[idx[1]],cY[idx[1]])
         
         idx_tube = 0
         for i in range(2):

@@ -53,14 +53,11 @@ filename_list = ['C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub0
                  'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub02_ab160281/average_FA55.nii',
                  'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub03_ag160127/average_FA55.nii']
 
-filename_list = ['C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub01_ab160146/average_FA25.nii',
-                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub02_ab160281/average_FA25.nii',
-                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub03_ag160127/average_FA25.nii']
-# Constants
-#states = ['OFF','ON']
-#TR = 30 #[ms]
-#FA = 59
+#filename_list = ['C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub01_ab160146/average_FA25.nii',
+#                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub02_ab160281/average_FA25.nii',
+#                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub03_ag160127/average_FA25.nii']
 
+# Constants
 #alexa data
 TR = 20 #
 FA = 55
@@ -72,8 +69,8 @@ a_agar_model = (36-52)/5
 number_tubes = 2  # right left subdivide in RB RF LB LF where F:front B: back
 
 # information on tubes _7T
-tubes_concentrations_front = [209, 105]
-tubes_concentrations_back = [155, 51]
+tubes_concentrations_front = [105, 155]
+tubes_concentrations_back = [51, 209]
 
 #tubes_concentrations_front = [105, 209]
 #tubes_concentrations_back = [51, 155]
@@ -134,10 +131,10 @@ concentrations_maps = np.zeros((N, M, P))
 
 
 # -------------------------------- Main code
-for i in range(len(filename_list)):
+for idx_img in range(len(filename_list)):
     
     #------------------------- Getting image
-    filename_current = filename_list[0]
+    filename_current = filename_list[idx_img]
  
    # Try to open the file
     try:
@@ -148,6 +145,7 @@ for i in range(len(filename_list)):
    
     # Retrieve the images
     image = niiData.get_fdata()
+    image[np.isnan(image)] = 0
     if FourDimensions:
         image = image[:,:,:,0]
         image = np.swapaxes(image,0,1)
@@ -292,10 +290,10 @@ for i in range(len(filename_list)):
     # ---------------------------- Save model
     model = {'a' : a, 'b' : b, 'std_error': std_err, 'TR': TR, 'FA': FA}
     
-    with open('model.pickle', 'wb') as handle:
+    with open('model_{0}_FA{1}.pickle'.format(idx_img,FA), 'wb') as handle:
         pickle.dump(model, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open('model.pickle', 'rb') as handle:
+    with open('model_{0}_FA{1}.pickle'.format(idx_img,FA), 'rb') as handle:
         model_load = pickle.load(handle)
     
 
