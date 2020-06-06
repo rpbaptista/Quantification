@@ -102,7 +102,7 @@ for idx_img in range(len(sodium_filename)):
         # f(x) = ax + b
     a = model_load['a']
     b = model_load['b']
-
+    print("Model:", a,b)
     # Load CSF
     niiData = nib.load(CSF_filename[idx_img])   
     affine = niiData.affine
@@ -136,12 +136,12 @@ for idx_img in range(len(sodium_filename)):
     
     # Change TSC
     # reducing mask resolution
-    maskCSF_T1 = sodium_image/pondT1(T1_CSF,TR,FA) *probability_CSF # Signal -> Signal/pondT1 
+    maskCSF_T1 = sodium_image*probability_CSF/(pondT1(T1_CSF,TR,FA)) # Signal -> Signal/pondT1 
     #maskCSF_lr = scipy.ndimage.filters.gaussian_filter(probability_CSF.astype(float),
     #                                                 (sigma,sigma,sigma))
     #maskCSF_lr = scipy.ndimage.filters.gaussian_filter(probability_CSF.astype(float),
     #                                                 (sigmaVoxel,sigmaVoxel,sigmaVoxel))
-    maskTissue_T1 = sodium_image/pondT1(T1_tissue,TR,FA) * (probability_tissue) # Signal -> Signal/pondT1 
+    maskTissue_T1 = sodium_image*probability_tissue/(pondT1(T1_tissue,TR,FA)) # Signal -> Signal/pondT1 
     
     TSC_CSF_apparent = maskCSF_T1*a + b #signal/ponT1 -> mM
     #TSC_CSF_theorical_psf = maskCSF_lr*C_CSF
@@ -151,30 +151,30 @@ for idx_img in range(len(sodium_filename)):
     
     #TSC_tissue_apparent_no_csf[TSC_tissue_apparent < 0] = 0 # concentration negative pas de sense
     
-    for i in range(P):
-        diff = TSC_CSF_apparent[:,:,i] - TSC_CSF_theorical[:,:,i]
-        #if (np.max(np.max(diff)) - np.min(np.min(diff)))> 0.1:
-        print("Slice", i, "from", P)
+    for i in range(N):
+        diff = TSC_CSF_apparent[i,:,:] - TSC_CSF_theorical[i,:,:]
+      #  if (np.max(np.max(diff)) - np.min(np.min(diff)))> 0.1:
+     #   print("Slice", i, "from", M)
     
-        f, axarr = plt.subplots(1,3,figsize=(10,30))
-        axarr[0].imshow(TSC_CSF_apparent[:,:,i].T, cmap='hot', vmin=0, vmax=150)
-        axarr[1].imshow(TSC_CSF_theorical[:,:,i].T, cmap='hot', vmin=0, vmax=150)
-        axarr[2].imshow((diff.T>0)*150, cmap='hot', vmin=000, vmax=150)
-        
-        print("  MIN:",np.min(np.min(diff)))
-        print("  MAX:",np.max(np.max(diff)))
-        print("  Negative voxels:",np.sum(np.sum(diff<0)))
-        print("  Total pixels:", np.sum(np.sum(probability_CSF[:,:,i] > 0)))        
-     #   plt.colorbar()
-            
-        plt.show()
-            
+#        f, axarr = plt.subplots(1,3,figsize=(10,30))
+#        axarr[0].imshow(TSC_CSF_apparent[:,i,:].T, cmap='hot', vmin=0, vmax=150)
+#        axarr[1].imshow(TSC_CSF_theorical[:,i,:].T, cmap='hot', vmin=0, vmax=150)
+#        axarr[2].imshow((diff.T>0)*150, cmap='hot', vmin=000, vmax=150)
+#        
+#        print("  MIN:",np.min(np.min(diff)))
+#        print("  MAX:",np.max(np.max(diff)))
+#        print("  Negative voxels:",np.sum(np.sum(diff<0)))
+#        print("  Total pixels:", np.sum(np.sum(probability_CSF[:,:,i] > 0)))        
+#     #   plt.colorbar()
+#            
+#        plt.show()
+#            
     
-    for i in range(P):
-        if np.sum(np.sum(TSC_tissue_apparent[:,:,i].T)) != 0:
-            print("Slice",i,"from", P)
+    for i in range(N):
+        if np.sum(np.sum(TSC_tissue_apparent[i,:,:].T)) != 0:
+            print("Slice",i,"from", N)
             
-            plt.imshow(TSC_tissue_apparent[:,:,i].T, cmap='hot', vmin=000,vmax=60)
+            plt.imshow(TSC_tissue_apparent[i,:,:], cmap='hot', vmin=000,vmax=60)
             plt.colorbar()
             plt.show()
     

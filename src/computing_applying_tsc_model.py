@@ -52,11 +52,13 @@ from equations import pondT1
 filename_list = ['C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub01_ab160146/average_FA53.nii',
                  'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub02_ab160281/average_FA55.nii',
                  'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub03_ag160127/average_FA55.nii']
-
 #filename_list = ['C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub01_ab160146/average_FA25.nii',
 #                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub02_ab160281/average_FA25.nii',
 #                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub03_ag160127/average_FA25.nii']
 
+filename_list = ['X:\people\Renata\ReconstructedData\Examples\M0_na.nii.gz']
+
+#                 
 # Constants
 #alexa data
 TR = 20 #
@@ -69,11 +71,11 @@ a_agar_model = (36-52)/5
 number_tubes = 2  # right left subdivide in RB RF LB LF where F:front B: back
 
 # information on tubes _7T
-tubes_concentrations_front = [105, 155]
-tubes_concentrations_back = [51, 209]
+tubes_concentrations_front = [51, 155]
+tubes_concentrations_back = [105, 209]
 
-#tubes_concentrations_front = [105, 209]
-#tubes_concentrations_back = [51, 155]
+#tubes_concentrations_front= [105, 155]
+#tubes_concentrations_back = [51, 209]
 
 
 # OPTIONS ================= 3T 
@@ -85,14 +87,14 @@ if (Machine3T == True):
     tubes_concentrations_front = [51,105]
     tubes_concentrations_back = [51,105]
 
-agar_concentrations = np.asarray([2.0, 2.0, 2.0, 2.0]) #np.asarray changes type 
+agar_concentrations = np.asarray([0.3, 0.9, 0.6, 1.2]) #np.asarray changes type 
 #list to np array, which is optimize to compute operation in all array at once
 factor_correction_liquid_tissue = 1#0.8
 factor_psf = 1
 
 T1_agar_tubes = agar_concentrations*a_agar_model + b_agar_model
 # Once T1_agar_tubes is known; comment the line above and replace by
-T1_agar_tubes = np.asarray([36.2, 36.2, 36.2, 36.2])
+#T1_agar_tubes = np.asarray([36.2, 36.2, 36.2, 36.2])
 #T2 = 13.4 or 17/5.2 #T2star = 4.3
             
 # Pick a file to get the size
@@ -206,7 +208,7 @@ for idx_img in range(len(filename_list)):
     final_slice =  int(np.round(P*0.88))
 
     for i in np.arange(initial_slice, final_slice, 1, dtype=np.int16):
-        print("z",i)
+      #  print("z",i)
         if np.sum( masks[1,:,:,i] +  masks[0,:,:,i]) > 0 and (i < idx_change-secure_margin or i > idx_change+secure_margin) :
             
             img_scaled = image64[:,:,i].T/np.max(np.max(image64[:,:,i]))
@@ -217,10 +219,10 @@ for idx_img in range(len(filename_list)):
             erosion_mask2 = erosion_masks[1,:,:,i].T/np.max(np.max(image8[:,:,i]))
             erosion_mask1 = erosion_masks[0,:,:,i].T/np.max(np.max(image8[:,:,i]))
        
-            plt.imshow(np.hstack([img_scaled,
-                                  erosion_mask1*img_scaled,
-                                  erosion_mask2*img_scaled]), cmap='gray')
-            plt.show()
+#            plt.imshow(np.hstack([img_scaled,
+#                                  erosion_mask1*img_scaled,
+#                                  erosion_mask2*img_scaled]), cmap='gray')
+#            plt.show()
     # ------------------- Analyzing histogram
     
     # retrive regions where we found the tubes
@@ -228,23 +230,31 @@ for idx_img in range(len(filename_list)):
     for i in range(number_tubes):
        # masks = erosion_masks
         # Saving 0 - idx change, in Z
-        idx_true_mask =  np.where(erosion_masks[i,:,:,initial_slice:idx_change-secure_margin] > 0)
+        part_tube = np.zeros((erosion_masks[i,:,:,:]).shape)
+        part_tube[:,:,initial_slice:idx_change-secure_margin] = 1
+        idx_true_mask =  np.where(erosion_masks[i,:,:,:]*part_tube > 0)
+        #print(size(idx_true_mask))
         roi_tube_front = image64[idx_true_mask]
        # roi_tube_front = np.ma.array(roi_tube_front, mask=roi_tube_front>0.001)
         average_intensities_front[i] = np.mean(roi_tube_front)
         median_intensities_front[i] = np.median(roi_tube_front)
-        percentil_intensities_front[i] = np.sort(roi_tube_front)[int(len(roi_tube_front)*0.8)]
-
-        
+        percentil_intensities_front[i] = np.sort(roi_tube_front)[int(len(roi_tube_front)*0.9)]
+        plt.plot(np.sort(roi_tube_front))
+        plt.show()
         if Machine3T == False:
             # Saving values from idx change - Last
-            idx_true_mask =  np.where(erosion_masks[i,:,:,idx_change+secure_margin:final_slice] > 0)
+            part_tube = np.zeros((erosion_masks[i,:,:,:]).shape)
+            part_tube[:,:,idx_change+secure_margin:final_slice] = 1
+        
+            idx_true_mask =  np.where(erosion_masks[i,:,:,:]*part_tube > 0)
             roi_tube_back = image64[idx_true_mask]
         #    roi_tube_back = np.ma.array(roi_tube_back, mask=roi_tube_back>0.001)
-
+         
             average_intensities_back[i] = np.mean(roi_tube_back)
             median_intensities_back[i] = np.median(roi_tube_back)
-            percentil_intensities_back[i] = np.sort(roi_tube_back)[int(len(roi_tube_back)*0.8)]
+            percentil_intensities_back[i] = np.sort(roi_tube_back)[int(len(roi_tube_back)*0.9)]
+           # plt.plot(np.sort(roi_tube_back))
+           # plt.show()
 
 
       # Plotting
@@ -264,9 +274,9 @@ for idx_img in range(len(filename_list)):
     # -------------------------- Quantifying 
     if Machine3T == False:
         y = np.hstack([tubes_concentrations_front, tubes_concentrations_back])
-        x = np.hstack([average_intensities_front, average_intensities_back])
+       # x = np.hstack([average_intensities_front, average_intensities_back])
       #  x = np.hstack([median_intensities_front, median_intensities_back])
-      #  x = np.hstack([percentil_intensities_front, percentil_intensities_back])
+        x = np.hstack([percentil_intensities_front, percentil_intensities_back])
     else:
         y = tubes_concentrations_front
         x = average_intensities_front
@@ -274,7 +284,7 @@ for idx_img in range(len(filename_list)):
         
     factor_correction_T1_tubes  = pondT1(T1_agar_tubes, TR, FA)
     x_correct = (x*factor_correction_liquid_tissue)/(factor_correction_T1_tubes*factor_psf)
-  #  x_correct = x
+    x_correct = x
     gradient, intercept, r_value, p_value, std_err = linregress(x_correct,y)
 
     a = gradient
