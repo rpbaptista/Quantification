@@ -31,7 +31,8 @@ from dipy.denoise.noise_estimate import estimate_sigma
 import pickle
 from pylab import * 
 from scipy.stats import linregress
-
+from datetime import datetime
+startTime = datetime.now()
 
 # this is the folder where the script is install,
 # to be modify if u are running in other coputing
@@ -258,16 +259,16 @@ for idx_img in range(len(filename_list)):
 
 
       # Plotting
-        plt.hist(x = roi_tube_front)
-        plt.title("Histogram of front, tube:" + str(i))
-        plt.show()       
-        print("G mean front, ",np.mean(roi_tube_front))
+     #   plt.hist(x = roi_tube_front)
+     #   plt.title("Histogram of front, tube:" + str(i))
+     #   plt.show()       
+     #   print("G mean front, ",np.mean(roi_tube_front))
    
-        if Machine3T == False:
-            fig = plt.hist(x = roi_tube_back)
-            plt.title("Histogram of back, tube:" +str(i))
-            plt.show()        
-            print("G mean back, ",np.mean(roi_tube_back))
+     #   if Machine3T == False:
+     #       fig = plt.hist(x = roi_tube_back)
+     #       plt.title("Histogram of back, tube:" +str(i))
+     #       plt.show()        
+     #       print("G mean back, ",np.mean(roi_tube_back))
           
 
 
@@ -293,10 +294,12 @@ for idx_img in range(len(filename_list)):
     
     # ---------------------------- Veryfing 
     plt.plot(x_correct, y, 'yo', x_correct, a*x_correct+b, '--k') 
+    plt.title("Calibration curve: y = {0}x{1}".format(a,b))
     plt.show() 
     print("R_value:", r_value)
 
-    
+    print(datetime.now() - startTime)
+
     # ---------------------------- Save model
     model = {'a' : a, 'b' : b, 'std_error': std_err, 'TR': TR, 'FA': FA}
     
@@ -306,7 +309,7 @@ for idx_img in range(len(filename_list)):
     with open('model_{0}_FA{1}.pickle'.format(idx_img,FA), 'rb') as handle:
         model_load = pickle.load(handle)
     
-
+    
  #  #--------------------------- Save TSC
   #  nib.save(nib.Nifti1Image(image64*a+b, affine), output_current)
 

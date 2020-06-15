@@ -174,7 +174,7 @@ for idx_img in range(len(sodium_filename)):
         if np.sum(np.sum(TSC_tissue_apparent[i,:,:].T)) != 0:
             print("Slice",i,"from", N)
             
-            plt.imshow(TSC_tissue_apparent[i,:,:], cmap='hot', vmin=000,vmax=60)
+            plt.imshow(TSC_tissue_apparent[i,:,:], cmap='hot', vmin=000,vmax=140)
             plt.colorbar()
             plt.show()
     
