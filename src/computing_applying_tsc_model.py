@@ -40,6 +40,8 @@ startTime = datetime.now()
 #root = 'C:/Users/rp258738/Documents/Codes_local/'
 root = '/neurospin/ciclops/people/Renata/Codes/'
 folder = 'Quantification/src/'
+output_folder = 'Quantification/output/'
+
 packages = ['libs']
 
 for i in range(len(packages)):
@@ -313,10 +315,13 @@ for idx_img in range(len(filename_list)):
     # ---------------------------- Save model
     model = {'a' : a, 'b' : b, 'std_error': std_err, 'TR': TR, 'FA': FA}
     
-    with open('model_{0}_FA{1}.pickle'.format(idx_img,FA), 'wb') as handle:
+    model_filename = 'model_{0}_FA{1}.pickle'.format(idx_img,FA)
+    fullpath_output = os.path.join(root, output_folder, model_filename)
+
+    with open( fullpath_output, 'wb') as handle:
         pickle.dump(model, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open('model_{0}_FA{1}.pickle'.format(idx_img,FA), 'rb') as handle:
+    with open( fullpath_output, 'rb') as handle:
         model_load = pickle.load(handle)
     
     
