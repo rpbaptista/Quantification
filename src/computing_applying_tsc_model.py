@@ -37,27 +37,36 @@ startTime = datetime.now()
 # this is the folder where the script is install,
 # to be modify if u are running in other coputing
 #root = 'Z:/people/Renata/Python_scripts/'
-root = 'C:/Users/rp258738/Documents/Codes_local/'
+#root = 'C:/Users/rp258738/Documents/Codes_local/'
+root = '/neurospin/ciclops/people/Renata/Codes/'
 folder = 'Quantification/src/'
 packages = ['libs']
 
 for i in range(len(packages)):
     sys.path.insert(0, os.path.join(root, folder, packages[i]))
-    
+    #sys.path.append()
 # Import : homemade libraries
 from segmentation import getTube3D, createArtificialMask
 from equations import pondT1
 
 # ------------------------------ Constants, paths
 # Path strings
-filename_list = ['C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub01_ab160146/average_FA53.nii',
-                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub02_ab160281/average_FA55.nii',
-                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub03_ag160127/average_FA55.nii']
+#filename_list = ['C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub01_ab160146/average_FA53.nii',
+#                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub02_ab160281/average_FA55.nii',
+#                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub03_ag160127/average_FA55.nii']
 #filename_list = ['C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub01_ab160146/average_FA25.nii',
 #                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub02_ab160281/average_FA25.nii',
 #                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub03_ag160127/average_FA25.nii']
+#filename_list = ['C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub01_ab160146/average_FA25.nii',
+#                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub02_ab160281/average_FA25.nii',
+#                 'C:/Users/rp258738/Documents/VirtualMachine-Ubuntu/Results/sub03_ag160127/average_FA25.nii']
+#filename_list = ['/neurospin/ciclops/people/Renata/ProcessedData/Results/sub01_ab160146/average_FA25.nii',
+#                 '/neurospin/ciclops/people/Renata/ProcessedData/Results/sub02_ab160281/average_FA25.nii',
+#                 '/neurospin/ciclops/people/Renata/ProcessedData/Results/sub03_ag160127/average_FA25.nii']
 
-filename_list = ['X:\people\Renata\ReconstructedData\Examples\M0_na.nii.gz']
+
+#filename_list = ['X:\people\Renata\ReconstructedData\Examples\M0_na.nii.gz']
+filename_list = ['/neurospin/ciclops/people/Renata/ReconstructedData/23Na_patients/Examples/M0_na.nii.gz']
 
 #                 
 # Constants
@@ -119,6 +128,7 @@ except IOError:
 
 
 # Model variables
+
 a = 0
 b = 0
 
